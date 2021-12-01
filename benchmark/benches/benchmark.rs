@@ -2,8 +2,12 @@ use std::time::Duration;
 
 use criterion::{criterion_group, criterion_main, Criterion};
 
+pub fn day01_benchmark(c: &mut Criterion) {
+    c.bench_function("day01", |b| b.iter(|| day01::solve()));
+}
+
 pub fn alldays_benchmark(c: &mut Criterion) {
-    c.bench_function("all", |b| b.iter(|| ()));
+    c.bench_function("all", |b| b.iter(|| (day01::solve(),)));
 }
 
 criterion_group! {
@@ -17,6 +21,7 @@ criterion_group! {
         .noise_threshold(0.05);
 
     targets =
+        day01_benchmark,
         alldays_benchmark
 }
 
