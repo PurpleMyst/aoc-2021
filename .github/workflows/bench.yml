@@ -1,0 +1,22 @@
+---
+name: Benchmark
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run criterion
+        uses: icepuma/rust-action@master
+        with:
+          args: cargo install --version=1.0.0-alpha3 cargo-criterion && cargo criterion
+      - name: Upload criterion reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: target-criterion
+          path: target/criterion
+
