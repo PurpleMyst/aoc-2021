@@ -1,5 +1,5 @@
 ---
-name: Benchmark
+name: Criterion
 
 on: [push]
 
@@ -10,13 +10,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Run criterion
-        uses: icepuma/rust-action@master
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          args: cargo install --version=1.0.0-alpha3 cargo-criterion && cargo criterion
+          profile: minimal
+          toolchain: stable
+      - name: Install criterion
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-criterion
+          version: 1.0.0-alpha3
+          use-tool-cache: true
+      - name: Run criterion
+        uses: actions-rs/cargo@v1
+        with:
+          command: criterion
       - name: Upload criterion reports
         uses: actions/upload-artifact@v2
         with:
           name: target-criterion
           path: target/criterion
-
