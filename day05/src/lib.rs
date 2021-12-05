@@ -33,13 +33,11 @@ pub fn solve() -> (impl Display, impl Display) {
             let x = x1;
             for y in range(y1, y2) {
                 p1_space[y * SIDE + x] += 1;
-                p2_space[y * SIDE + x] += 1;
             }
         } else if y1 == y2 {
             let y = y1;
             for x in range(x1, x2) {
                 p1_space[y * SIDE + x] += 1;
-                p2_space[y * SIDE + x] += 1;
             }
         } else {
             let m = (y2 as isize - y1 as isize) / (x2 as isize - x1 as isize);
@@ -51,8 +49,16 @@ pub fn solve() -> (impl Display, impl Display) {
         }
     }
 
-    let p1 = p1_space.iter().filter(|&&n| n > 1).count();
-    let p2 = p2_space.iter().filter(|&&n| n > 1).count();
+    let mut p1 = 0;
+    let mut p2 = 0;
 
-    (p1, p2)
+    for (nondiag, diag) in p1_space.into_iter().zip(p2_space.into_iter()) {
+        if nondiag > 1 {
+            p1 += 1;
+        } else if diag + nondiag > 1 {
+            p2 += 1;
+        }
+    }
+
+    (p1, p1 + p2)
 }
