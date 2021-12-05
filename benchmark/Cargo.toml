@@ -12,7 +12,7 @@ day04 = { path = "../day04" }
 day05 = { path = "../day05" }
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = { version = "0.3", features = ["html_reports"] }
 
 [[bench]]
 name = "benchmark"
