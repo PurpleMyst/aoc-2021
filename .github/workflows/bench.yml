@@ -1,10 +1,10 @@
 ---
-name: Criterion
+name: Benchmark
 
 on: [push]
 
 jobs:
-  benchmark:
+  criterion:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,13 +16,33 @@ jobs:
           profile: minimal
           toolchain: stable
       - name: Run criterion for baseline 
+        continue-on-error: true
         working-directory: ./benchmark
-        run: git checkout HEAD^ && cargo bench -- --verbose --save-baseline previous
+        run: |
+          git checkout HEAD^ 
+          cargo bench --bench criterion -- --verbose --save-baseline previous
       - name: Run criterion on new commit
         working-directory: ./benchmark
-        run: git checkout - && cargo bench -- --verbose --baseline previous
+        run: |
+          git checkout -
+          cargo bench --bench criterion -- --verbose --baseline previous || cargo bench --bench criterion -- --verbose
       - name: Upload criterion reports
         uses: actions/upload-artifact@v2
         with:
           name: target-criterion
           path: target/criterion
+
+  iai:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Run iai
+        working-directory: ./benchmark
+        run: cargo bench --bench iai

@@ -14,9 +14,14 @@ day06 = { path = "../day06" }
 
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }
+iai = "0.1"
 
 [[bench]]
-name = "benchmark"
+name = "criterion"
+harness = false
+
+[[bench]]
+name = "iai"
 harness = false
 
 [lib]
