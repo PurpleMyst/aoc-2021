@@ -20,7 +20,7 @@ jobs:
         run: git checkout HEAD^ && cargo bench -- --verbose --save-baseline previous
       - name: Run criterion on new commit
         working-directory: ./benchmark
-        run: git checkout - && cargo bench -- --verbose --load-baseline new --baseline previous
+        run: git checkout - && cargo bench -- --verbose --baseline previous
       - name: Upload criterion reports
         uses: actions/upload-artifact@v2
         with:
