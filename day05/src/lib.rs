@@ -1,20 +1,17 @@
-use std::{fmt::Display, ops::RangeInclusive};
-
-type Coord = usize;
-type Point = (Coord, Coord);
+use std::{cmp::Ordering, fmt::Display};
 
 const SIDE: usize = 1000;
 
-fn parse_point(s: &str) -> Point {
+fn parse_point(s: &str) -> (usize, usize) {
     let (x, y) = s.split_once(",").unwrap();
     (x.parse().unwrap(), y.parse().unwrap())
 }
 
-fn range(start: Coord, end: Coord) -> RangeInclusive<Coord> {
-    if start < end {
-        start..=end
-    } else {
-        end..=start
+fn delta(start: usize, end: usize) -> isize {
+    match start.cmp(&end) {
+        Ordering::Less => 1,
+        Ordering::Equal => 0,
+        Ordering::Greater => -1,
     }
 }
 
@@ -28,24 +25,19 @@ pub fn solve() -> (impl Display, impl Display) {
     let mut space = vec![0u8; SIDE * SIDE];
 
     for ((x1, y1), (x2, y2)) in lines {
-        if x1 == x2 {
-            let x = x1;
-            for y in range(y1, y2) {
-                space[y * SIDE + x] += 0x01;
-            }
-        } else if y1 == y2 {
-            let y = y1;
-            for x in range(x1, x2) {
-                space[y * SIDE + x] += 0x01;
-            }
-        } else {
-            let m = (y2 as isize - y1 as isize) / (x2 as isize - x1 as isize);
-            let q = y1 as isize - m * x1 as isize;
-            for x in range(x1, x2) {
-                let y = (m * x as isize + q) as usize;
-                space[y * SIDE + x] += 0x10;
-            }
+        let marker = if x1 == x2 || y1 == y2 { 0x01 } else { 0x10 };
+        let dx = delta(x1, x2);
+        let dy = delta(y1, y2);
+        let mut x = x1;
+        let mut y = y1;
+        while x != x2 || y != y2 {
+            space[y * SIDE + x] += marker;
+            x = (x as isize + dx) as usize;
+            y = (y as isize + dy) as usize;
         }
+
+        // extra iteration for (x2, y2)
+        space[y * SIDE + x] += marker;
     }
 
     let mut p1 = 0;

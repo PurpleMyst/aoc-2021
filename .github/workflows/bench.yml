@@ -4,7 +4,7 @@ name: Criterion
 on: [push]
 
 jobs:
-  build:
+  benchmark:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,16 +15,12 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-      - name: Install criterion
-        uses: actions-rs/install@v0.1
-        with:
-          crate: cargo-criterion
-          version: 1.0.0-alpha3
-          use-tool-cache: true
-      - name: Run criterion
-        uses: actions-rs/cargo@v1
-        with:
-          command: criterion
+      - name: Run criterion for baseline 
+        working-directory: ./benchmark
+        run: git checkout HEAD^ && cargo bench -- --verbose --save-baseline previous
+      - name: Run criterion on new commit
+        working-directory: ./benchmark
+        run: git checkout - && cargo bench -- --verbose --load-baseline new --baseline previous
       - name: Upload criterion reports
         uses: actions/upload-artifact@v2
         with:
