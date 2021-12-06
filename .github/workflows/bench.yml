@@ -43,6 +43,8 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+      - name: Install valgrind
+        run: sudo apt install -y valgrind
       - name: Run iai
         working-directory: ./benchmark
         run: cargo bench --bench iai
