@@ -12,54 +12,27 @@ fn sum_up_to(n: usize) -> usize {
     n * (n + 1) / 2
 }
 
-fn p2_fuel(crabs: &[usize; 2000], pos: usize) -> usize {
+fn p2_fuel(crabs: &[usize], pos: usize) -> usize {
     crabs
         .iter()
-        .enumerate()
-        .map(|(pos2, n)| sum_up_to(abs_diff(pos, pos2)) * n)
+        .map(|&pos2| sum_up_to(abs_diff(pos, pos2)))
         .sum()
 }
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
-    let mut crabs = [0; 2000];
-
-    include_str!("input.txt")
+    let mut crabs: Vec<_> = include_str!("input.txt")
         .trim()
         .split(',')
-        .for_each(|crab| crabs[crab.parse::<usize>().unwrap()] += 1);
+        .map(|crab| crab.parse::<usize>().unwrap())
+        .collect();
+    crabs.sort_unstable();
 
-    let p1: usize = crabs
-        .iter()
-        .enumerate()
-        .filter(|&(_, &n)| n != 0)
-        .map(|(pos, _)| {
-            crabs
-                .iter()
-                .enumerate()
-                .map(|(pos2, n)| abs_diff(pos, pos2) * n)
-                .sum()
-        })
-        .min()
-        .unwrap();
+    let median = crabs[crabs.len() / 2];
+    let mean = crabs.iter().sum::<usize>() / crabs.len();
 
-    let mut seed = 1000;
-    let mut current = p2_fuel(&crabs, seed);
+    let p1: usize = crabs.iter().map(|&pos| abs_diff(pos, median)).sum();
+    let p2: usize = p2_fuel(&crabs, mean).min(p2_fuel(&crabs, mean + 1));
 
-    loop {
-        let left = p2_fuel(&crabs, seed - 1);
-        let right = p2_fuel(&crabs, seed + 1);
-
-        if left < current {
-            seed -= 1;
-            current = left;
-        } else if right < current {
-            seed += 1;
-            current = right;
-        } else {
-            break;
-        }
-    }
-
-    (p1, p2_fuel(&crabs, seed))
+    (p1, p2)
 }
