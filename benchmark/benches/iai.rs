@@ -5,6 +5,7 @@ use day04::solve as day04_solve;
 use day05::solve as day05_solve;
 use day06::solve as day06_solve;
 use day07::solve as day07_solve;
+use day08::solve as day08_solve;
 
 iai::main!(
     day01_solve,
@@ -14,4 +15,5 @@ iai::main!(
     day05_solve,
     day06_solve,
     day07_solve,
+    day08_solve,
 );

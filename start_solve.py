@@ -21,7 +21,7 @@ use std::fmt::Display;
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {{
-    todo!()
+    ("TODO, "TODO")
 }}\
 """
 
