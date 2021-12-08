@@ -1,7 +1,5 @@
 use std::fmt::Display;
 
-use arrayvec::ArrayVec;
-
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
 struct Segments(u8);
 
@@ -37,11 +35,6 @@ impl Segments {
     }
 }
 
-fn deduce(bucket: &mut ArrayVec<Segments, 3>, predicate: impl Fn(&Segments) -> bool) -> Segments {
-    let nine_pos = bucket.iter().position(predicate).unwrap();
-    bucket.swap_remove(nine_pos)
-}
-
 impl LCD {
     fn parse(s: &str) -> LCD {
         let mut this = Self::default();
@@ -63,67 +56,45 @@ impl LCD {
         this
     }
 
-    fn part1(&self) -> usize {
+    fn count_trivial(&self) -> usize {
         self.output
             .iter()
             .filter(|segments| matches!(segments.on(), 2 | 3 | 4 | 7))
             .count()
     }
 
-    fn deduce(&self) -> [Segments; 10] {
+    fn deduce(&self) -> (Segments, Segments) {
         let mut one = None;
         let mut four = None;
-        let mut seven = None;
-        let mut eight = None;
 
-        let mut five_bucket = ArrayVec::<_, 3>::new();
-        let mut six_bucket = ArrayVec::<_, 3>::new();
-
-        for signal in self.signals {
-            match signal.on() {
-                2 => one = Some(signal),
-                3 => seven = Some(signal),
-                4 => four = Some(signal),
-                5 => five_bucket.push(signal),
-                6 => six_bucket.push(signal),
-                7 => eight = Some(signal),
-                _ => unreachable!(),
+        for segments in self.signals {
+            match segments.on() {
+                2 => one = Some(segments),
+                4 => four = Some(segments),
+                _ => {}
             }
         }
 
-        let one = one.unwrap();
-        let four = four.unwrap();
-        let seven = seven.unwrap();
-        let eight = eight.unwrap();
-
-        let three = deduce(&mut five_bucket, |signal| {
-            signal.in_common(&one) == one.on()
-        });
-
-        let five = deduce(&mut five_bucket, |signal| {
-            signal.in_common(&four) == four.on() - 1
-        });
-
-        let two = five_bucket.pop().unwrap();
-
-        let nine = deduce(&mut six_bucket, |signal| {
-            signal.in_common(&three) == three.on()
-        });
-
-        let zero = deduce(&mut six_bucket, |signal| {
-            signal.in_common(&seven) == seven.on()
-        });
-
-        let six = six_bucket.pop().unwrap();
-
-        [zero, one, two, three, four, five, six, seven, eight, nine]
+        (one.unwrap(), four.unwrap())
     }
 
-    fn part2(&self) -> usize {
-        let digits = self.deduce();
+    fn output_value(&self) -> usize {
+        let (one, four) = self.deduce();
         self.output
             .iter()
-            .map(|signal| digits.iter().position(|signal2| signal == signal2).unwrap())
+            .map(|segments| match (segments.on(), segments.in_common(&one), segments.in_common(&four)) {
+                (6, 2, 3) => 0,
+                (2, _, _) => 1,
+                (5, 1, 2) => 2,
+                (5, 2, 3) => 3,
+                (4, _, _) => 4,
+                (5, 1, 3) => 5,
+                (6, 1, 3) => 6,
+                (3, _, _) => 7,
+                (7, _, _) => 8,
+                (6, 2, 4) => 9,
+                _ => unreachable!(),
+            })
             .fold(0, |acc, val| 10 * acc + val)
     }
 }
@@ -136,8 +107,8 @@ pub fn solve() -> (impl Display, impl Display) {
     let mut p2: usize = 0;
 
     for line in lines {
-        p1 += line.part1();
-        p2 += line.part2();
+        p1 += line.count_trivial();
+        p2 += line.output_value();
     }
 
     (p1, p2)
