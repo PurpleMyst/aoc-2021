@@ -19,7 +19,7 @@ fn calculate_frequency(numbers: &[Item], pos: u32) -> (usize, usize) {
 }
 
 fn pass(numbers: &mut Vec<Item>, pos: usize, choose: impl Fn(usize, usize) -> u32) {
-    let (z, o) = calculate_frequency(&numbers, pos as u32);
+    let (z, o) = calculate_frequency(numbers, pos as u32);
     let desired = choose(z, o) << pos;
     numbers.retain(|n| n & (1 << pos) == desired);
 }
@@ -51,11 +51,11 @@ pub fn solve() -> (impl Display, impl Display) {
         .for_each(|(z, o)| match z.cmp(&o) {
             Ordering::Less => {
                 gamma = gamma << 1 | 1;
-                epsilon = epsilon << 1;
+                epsilon <<= 1;
             }
 
             Ordering::Equal | Ordering::Greater => {
-                gamma = gamma << 1;
+                gamma <<= 1;
                 epsilon = epsilon << 1 | 1;
             }
         });

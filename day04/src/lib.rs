@@ -7,7 +7,7 @@ type Drawn = [bool; 100];
 fn has_won(drawn: &Drawn, board: &Board) -> bool {
     (0..SIDE).any(|y| { // check rows
         board[y * SIDE..(y + 1) * SIDE]
-            .into_iter()
+            .iter()
             .all(|&cell| drawn[usize::from(cell)])
     }) || (0..SIDE).any(|x| { // check columns
         (0..SIDE)
@@ -68,12 +68,12 @@ pub fn solve() -> (impl Display, impl Display) {
         let mut len = boards.len();
         while idx < len {
             let candidate = &boards[idx];
-            if !has_won(&drawn, &candidate) {
+            if !has_won(&drawn, candidate) {
                 idx += 1;
                 continue;
             }
 
-            let score = partial_score(&drawn, &candidate) * u32::from(n);
+            let score = partial_score(&drawn, candidate) * u32::from(n);
             if p1.is_none() {
                 p1 = Some(score);
             }

@@ -12,7 +12,7 @@ impl std::fmt::Debug for Segments {
 }
 
 #[derive(Default, Clone, Copy)]
-struct LCD {
+struct SegmentDisplay {
     signals: [Segments; 10],
     output: [Segments; 4],
 }
@@ -35,8 +35,8 @@ impl Segments {
     }
 }
 
-impl LCD {
-    fn parse(s: &str) -> LCD {
+impl SegmentDisplay {
+    fn parse(s: &str) -> SegmentDisplay {
         let mut this = Self::default();
 
         let (signals, output) = s.split_once(" | ").unwrap();
@@ -101,7 +101,7 @@ impl LCD {
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
-    let lines = include_str!("input.txt").lines().map(LCD::parse);
+    let lines = include_str!("input.txt").lines().map(SegmentDisplay::parse);
 
     let mut p1: usize = 0;
     let mut p2: usize = 0;

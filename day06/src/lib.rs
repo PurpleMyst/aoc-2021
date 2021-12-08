@@ -16,7 +16,7 @@ pub fn solve() -> (impl Display, impl Display) {
 
     include_str!("input.txt")
         .trim()
-        .split(",")
+        .split(',')
         .for_each(|line| fishes[line.parse::<usize>().unwrap()] += 1);
 
     (run(&mut fishes, 80), run(&mut fishes, 256 - 80))
