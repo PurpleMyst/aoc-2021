@@ -1,7 +1,7 @@
-use std::{
-    collections::{BinaryHeap, HashSet},
-    fmt::Display,
-};
+use std::{cmp::Reverse, fmt::Display};
+
+use ahash::AHashSet;
+use arrayvec::ArrayVec;
 
 const SIDE: usize = 100;
 
@@ -27,27 +27,39 @@ fn neighbors(x: usize, y: usize) -> impl Iterator<Item = (usize, usize)> {
 }
 
 fn is_low(map: &Map, x: usize, y: usize) -> bool {
-    let value = map[y * SIDE + x];
-    neighbors(x, y).all(|(nx, ny)| value < map[ny * SIDE + nx])
+    let height = map[y * SIDE + x];
+    neighbors(x, y).all(|(nx, ny)| height < map[ny * SIDE + nx])
 }
 
-fn compute_basin(map: &Map, x: usize, y: usize) -> usize {
-    let mut q = vec![(x, y)];
-    let mut visited = HashSet::new();
+struct BasinComputer {
+    stack: ArrayVec<(usize, usize), { SIDE * SIDE }>,
+    visited: AHashSet<(usize, usize)>,
+}
 
-    while let Some((x, y)) = q.pop() {
-        if !visited.insert((x, y)) {
-            continue;
+impl BasinComputer {
+    fn new() -> Self {
+        Self {
+            stack: ArrayVec::new(),
+            visited: AHashSet::with_capacity(SIDE * SIDE),
         }
-
-        let value = map[y * SIDE + x];
-        q.extend(neighbors(x, y).filter(|&(nx, ny)| {
-            let nheight = map[ny * SIDE + nx];
-            nheight != 9 && nheight > value
-        }))
     }
 
-    visited.len()
+    fn compute_basin(&mut self, map: &Map, x: usize, y: usize) -> usize {
+        self.stack.clear();
+        self.visited.clear();
+        self.stack.push((x, y));
+
+        while let Some((x, y)) = self.stack.pop() {
+            self.visited.insert((x, y));
+            let height = map[y * SIDE + x];
+            self.stack.extend(neighbors(x, y).filter(|&(nx, ny)| {
+                let nheight = map[ny * SIDE + nx];
+                nheight != 9 && nheight > height && !self.visited.contains(&(nx, ny))
+            }))
+        }
+
+        self.visited.len()
+    }
 }
 
 #[inline]
@@ -62,7 +74,8 @@ pub fn solve() -> (impl Display, impl Display) {
         .for_each(|(val, elem)| *elem = val - b'0');
 
     let mut p1: u64 = 0;
-    let mut basins = BinaryHeap::<usize>::new();
+    let mut basins = [Reverse(0); 3];
+    let mut computer = BasinComputer::new();
 
     for y in 0..SIDE {
         for x in 0..SIDE {
@@ -72,11 +85,17 @@ pub fn solve() -> (impl Display, impl Display) {
 
             p1 += 1 + u64::from(map[y * SIDE + x]);
 
-            basins.push(compute_basin(&map, x, y));
+            let basin = Reverse(computer.compute_basin(&map, x, y));
+            let (Ok(idx) | Err(idx)) = basins.binary_search(&basin);
+            if idx == basins.len() {
+                continue;
+            }
+            basins[idx..].rotate_right(1);
+            basins[idx] = basin;
         }
     }
 
-    let p2: usize = (0..3).map(|_| basins.pop().unwrap()).product();
+    let p2: usize = basins.into_iter().map(|Reverse(n)| n).product();
 
     (p1, p2)
 }
