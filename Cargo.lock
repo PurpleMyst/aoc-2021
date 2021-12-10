@@ -27,6 +27,7 @@ dependencies = [
  "day07",
  "day08",
  "day09",
+ "day10",
  "iai",
 ]
 
@@ -244,6 +245,10 @@ dependencies = [
  "ahash",
  "arrayvec",
 ]
+
+[[package]]
+name = "day10"
+version = "0.1.0"
 
 [[package]]
 name = "either"
