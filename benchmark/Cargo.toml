@@ -31,3 +31,5 @@ harness = false
 
 [lib]
 bench = false
+
+[features]

@@ -1,24 +1,20 @@
-use day01::solve as day01_solve;
-use day02::solve as day02_solve;
-use day03::solve as day03_solve;
-use day04::solve as day04_solve;
-use day05::solve as day05_solve;
-use day06::solve as day06_solve;
-use day07::solve as day07_solve;
-use day08::solve as day08_solve;
-use day09::solve as day09_solve;
-use day10::solve as day11_solve;
+macro_rules! doit {
+    ($($day:ident: $solve:ident),+$(,)?) => {
+        $(use $day::solve as $solve;)+
+        iai::main!($($solve),+);
+    };
+}
 
-iai::main!(
-    day01_solve,
-    day02_solve,
-    day03_solve,
-    day04_solve,
-    day05_solve,
-    day06_solve,
-    day07_solve,
-    day08_solve,
-    day09_solve,
-    day10_solve,
-    day11_solve,
+doit!(
+    day01: day01_solve,
+    day02: day02_solve,
+    day03: day03_solve,
+    day04: day04_solve,
+    day05: day05_solve,
+    day06: day06_solve,
+    day07: day07_solve,
+    day08: day08_solve,
+    day09: day09_solve,
+    day10: day10_solve,
+    day11: day11_solve,
 );
