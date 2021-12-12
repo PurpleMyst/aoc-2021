@@ -1,9 +1,5 @@
 use std::fmt::Display;
 
-use ahash::AHashMap;
-
-type Graph = AHashMap<Cave, Vec<Cave>>;
-
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 enum Cave {
     Start,
@@ -21,26 +17,33 @@ impl Cave {
             &[hi, lo] => {
                 if hi.is_ascii_uppercase() {
                     debug_assert!(lo.is_ascii_uppercase());
-                    Self::Big((hi as u16 - b'A' as u16) * 26 + (lo as u16 - b'A' as u16))
+                    Self::Big(hi as u16 - b'A' as u16)
                 } else {
-                    Self::Small((hi as u16 - b'a' as u16) * 26 + (lo as u16 - b'a' as u16))
+                    Self::Small(hi as u16 - b'a' as u16)
                 }
             }
 
             _ => unreachable!(),
         }
     }
+
+    fn id(&self) -> Option<u16>  {
+        match self {
+            Cave::Small(id) | Cave::Big(id) => Some(*id),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]
 struct P1Visited {
-    visited: [bool; 26 * 26],
+    visited: [bool; 26],
 }
 
 impl P1Visited {
     fn new() -> Self {
         Self {
-            visited: [false; 26 * 26],
+            visited: [false; 26],
         }
     }
 
@@ -92,12 +95,16 @@ impl P2Visited {
 // since we only care about if nodes have been visited or not, we can use a DFS and handle the
 // visited map like a stack
 fn p1_walk(graph: &Graph, visited: &mut P1Visited, current: Cave, counter: &mut usize) {
-    if current == Cave::End {
-        *counter += 1;
-        return;
-    }
+    let neighbors = match current {
+        Cave::Start => unreachable!(),
+        Cave::End => {
+            *counter += 1;
+            return;
+        }
+        Cave::Small(current) | Cave::Big(current) => &graph.0[usize::from(current)],
+    };
 
-    graph[&current]
+    neighbors
         .iter()
         .copied()
         .filter(|&cave| cave != Cave::Start)
@@ -115,12 +122,16 @@ fn p1_walk(graph: &Graph, visited: &mut P1Visited, current: Cave, counter: &mut 
 }
 
 fn p2_walk(graph: &Graph, visited: &mut P2Visited, current: Cave, counter: &mut usize) {
-    if current == Cave::End {
-        *counter += 1;
-        return;
-    }
+    let neighbors = match current {
+        Cave::Start => unreachable!(),
+        Cave::End => {
+            *counter += 1;
+            return;
+        }
+        Cave::Small(current) | Cave::Big(current) => &graph.0[usize::from(current)],
+    };
 
-    graph[&current]
+    neighbors
         .iter()
         .copied()
         .filter(|&cave| cave != Cave::Start)
@@ -137,23 +148,53 @@ fn p2_walk(graph: &Graph, visited: &mut P2Visited, current: Cave, counter: &mut 
         })
 }
 
+struct Graph([Vec<Cave>; 26]);
+
+impl Graph {
+    fn new() -> Self {
+        Self(array_init::array_init(|_| Vec::new()))
+    }
+
+    fn edge(&mut self, from: Cave, to: Cave) {
+        if let Some(from) = from.id() {
+            self.0[usize::from(from)].push(to);
+        }
+        if let Some(to) = to.id() {
+            self.0[usize::from(to)].push(from);
+        }
+    }
+}
+
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
-    let mut graph: Graph = Default::default();
+    let mut start_neighbors = Vec::new();
+    let mut graph = Graph::new();
 
     include_str!("input.txt").trim().lines().for_each(|line| {
         let (from, to) = line.split_once('-').unwrap();
         let from = Cave::parse(from);
         let to = Cave::parse(to);
-        graph.entry(from).or_default().push(to);
-        graph.entry(to).or_default().push(from);
+        match (from, to) {
+            (Cave::Start, to) | (to, Cave::Start) => start_neighbors.push(to),
+            (from, to) => graph.edge(from, to),
+        }
     });
 
     let mut p1 = 0;
-    p1_walk(&graph, &mut P1Visited::new(), Cave::Start, &mut p1);
+    let mut p1_visited = P1Visited::new();
+    for &cave in &start_neighbors {
+        p1_visited.push(cave.id().unwrap());
+        p1_walk(&graph, &mut p1_visited, cave, &mut p1);
+        p1_visited.pop(cave.id().unwrap());
+    }
 
     let mut p2 = 0;
-    p2_walk(&graph, &mut P2Visited::new(), Cave::Start, &mut p2);
+    let mut p2_visited = P2Visited::new();
+    for &cave in &start_neighbors {
+        p2_visited.push(cave.id().unwrap());
+        p2_walk(&graph, &mut p2_visited, cave, &mut p2);
+        p2_visited.pop(cave.id().unwrap());
+    }
 
     (p1, p2)
 }
