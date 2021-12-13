@@ -39,9 +39,7 @@ impl Paper {
             let y = y.parse::<usize>().unwrap();
             dots.push((x, y));
         }
-        Self {
-            dots,
-        }
+        Self { dots }
     }
 
     fn fold_x(&mut self, n: usize) {

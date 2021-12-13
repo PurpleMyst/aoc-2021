@@ -63,7 +63,7 @@ pub fn solve() -> (impl Display, impl Display) {
         })
         .collect();
 
-    p2_scores.sort();
+    p2_scores.sort_unstable();
     let p2 = p2_scores[p2_scores.len() / 2];
 
     (p1, p2)
