@@ -5,11 +5,13 @@ type Board = [u8; SIDE * SIDE];
 type Drawn = [bool; 100];
 
 fn has_won(drawn: &Drawn, board: &Board) -> bool {
-    (0..SIDE).any(|y| { // check rows
+    (0..SIDE).any(|y| {
+        // check rows
         board[y * SIDE..(y + 1) * SIDE]
             .iter()
             .all(|&cell| drawn[usize::from(cell)])
-    }) || (0..SIDE).any(|x| { // check columns
+    }) || (0..SIDE).any(|x| {
+        // check columns
         (0..SIDE)
             .map(|y| board[y * SIDE + x])
             .all(|cell| drawn[usize::from(cell)])

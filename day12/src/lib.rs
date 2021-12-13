@@ -27,7 +27,7 @@ impl Cave {
         }
     }
 
-    fn id(&self) -> Option<u16>  {
+    fn id(&self) -> Option<u16> {
         match self {
             Cave::Small(id) | Cave::Big(id) => Some(*id),
             _ => None,

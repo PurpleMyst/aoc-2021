@@ -82,18 +82,24 @@ impl SegmentDisplay {
         let (one, four) = self.deduce();
         self.output
             .iter()
-            .map(|segments| match (segments.on(), segments.in_common(&one), segments.in_common(&four)) {
-                (6, 2, 3) => 0,
-                (2, _, _) => 1,
-                (5, 1, 2) => 2,
-                (5, 2, 3) => 3,
-                (4, _, _) => 4,
-                (5, 1, 3) => 5,
-                (6, 1, 3) => 6,
-                (3, _, _) => 7,
-                (7, _, _) => 8,
-                (6, 2, 4) => 9,
-                _ => unreachable!(),
+            .map(|segments| {
+                match (
+                    segments.on(),
+                    segments.in_common(&one),
+                    segments.in_common(&four),
+                ) {
+                    (6, 2, 3) => 0,
+                    (2, _, _) => 1,
+                    (5, 1, 2) => 2,
+                    (5, 2, 3) => 3,
+                    (4, _, _) => 4,
+                    (5, 1, 3) => 5,
+                    (6, 1, 3) => 6,
+                    (3, _, _) => 7,
+                    (7, _, _) => 8,
+                    (6, 2, 4) => 9,
+                    _ => unreachable!(),
+                }
             })
             .fold(0, |acc, val| 10 * acc + val)
     }

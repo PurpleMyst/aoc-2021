@@ -17,6 +17,7 @@ day09 = { path = "../day09" }
 day10 = { path = "../day10" }
 day11 = { path = "../day11" }
 day12 = { path = "../day12" }
+day13 = { path = "../day13" }
 
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }
