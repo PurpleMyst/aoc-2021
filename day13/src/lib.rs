@@ -21,7 +21,7 @@ impl Display for Paper {
                     f,
                     "{}",
                     if self.dots.contains(&(x, y)) {
-                        '#'
+                        '\u{2588}'
                     } else {
                         ' '
                     }
