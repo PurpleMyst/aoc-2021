@@ -1,9 +1,7 @@
 use std::fmt::Display;
 
-use ahash::AHashSet;
-
 struct Paper {
-    dots: AHashSet<(usize, usize)>,
+    dots: Vec<(usize, usize)>,
 }
 
 impl Display for Paper {
@@ -35,11 +33,11 @@ impl Display for Paper {
 
 impl Paper {
     fn new(points: &str) -> Self {
-        let mut dots = AHashSet::new();
+        let mut dots = Vec::new();
         for (x, y) in points.lines().map(|p| p.split_once(',').unwrap()) {
             let x = x.parse::<usize>().unwrap();
             let y = y.parse::<usize>().unwrap();
-            dots.insert((x, y));
+            dots.push((x, y));
         }
         Self {
             dots,
@@ -48,22 +46,18 @@ impl Paper {
 
     fn fold_x(&mut self, n: usize) {
         // folding on vertical line x = n
-        for (x, y) in std::mem::take(&mut self.dots) {
-            if x < n {
-                self.dots.insert((x, y));
-            } else {
-                self.dots.insert((2 * n - x, y));
+        for (x, _) in &mut self.dots {
+            if *x > n {
+                *x = 2 * n - *x;
             }
         }
     }
 
     fn fold_y(&mut self, n: usize) {
         // folding on horizontal line y = n
-        for (x, y) in std::mem::take(&mut self.dots) {
-            if y < n {
-                self.dots.insert((x, y));
-            } else {
-                self.dots.insert((x, 2 * n - y));
+        for (_, y) in &mut self.dots {
+            if *y > n {
+                *y = 2 * n - *y;
             }
         }
     }
