@@ -1,12 +1,14 @@
 use std::fmt::Display;
 
+use ahash::AHashSet;
+
 const WIDTH: usize = 1311;
 const HEIGHT: usize = 895;
 
 struct Paper {
     width: usize,
     height: usize,
-    dots: Vec<bool>,
+    dots: AHashSet<(usize, usize)>,
 }
 
 impl Display for Paper {
@@ -16,7 +18,7 @@ impl Display for Paper {
                 write!(
                     f,
                     "{}",
-                    if self.dots[y * self.width + x] {
+                    if self.dots.contains(&(x, y)) {
                         '#'
                     } else {
                         ' '
@@ -31,12 +33,12 @@ impl Display for Paper {
 
 impl Paper {
     fn new(points: &str) -> Self {
-        let mut dots = vec![false; WIDTH * HEIGHT];
+        let mut dots = AHashSet::new();
         for (x, y) in points.lines().map(|p| p.split_once(',').unwrap()) {
             let x = x.parse::<usize>().unwrap();
             let y = y.parse::<usize>().unwrap();
             debug_assert!(x < WIDTH && y < HEIGHT, "{} {}", x, y);
-            dots[y * WIDTH + x] = true;
+            dots.insert((x, y));
         }
         Self {
             width: WIDTH,
@@ -47,35 +49,28 @@ impl Paper {
 
     fn fold_x(&mut self, n: usize) {
         // folding on vertical line x = n
-        let mut folded = vec![false; n * self.height];
-
-        for x in 0..n {
-            for y in 0..self.height {
-                let xp = self.width - x - 1;
-
-                folded[y * n + x] = self.dots[y * self.width + x] | self.dots[y * self.width + xp];
+        for (x, y) in std::mem::take(&mut self.dots) {
+            if x < n {
+                self.dots.insert((x, y));
+            } else {
+                self.dots.insert((2 * n - x, y));
             }
         }
 
         self.width = n;
-        self.dots = folded;
     }
 
     fn fold_y(&mut self, n: usize) {
         // folding on horizontal line y = n
-        let mut folded = vec![false; self.width * n];
-
-        for x in 0..self.width {
-            for y in 0..n {
-                let yp = self.height - y - 1;
-
-                folded[y * self.width + x] =
-                    self.dots[y * self.width + x] | self.dots[yp * self.width + x];
+        for (x, y) in std::mem::take(&mut self.dots) {
+            if y < n {
+                self.dots.insert((x, y));
+            } else {
+                self.dots.insert((x, 2 * n - y));
             }
         }
 
         self.height = n;
-        self.dots = folded;
     }
 }
 
@@ -96,7 +91,7 @@ pub fn solve() -> (impl Display, impl Display) {
         }
 
         if p1.is_none() {
-            p1 = Some(paper.dots.iter().filter(|b| **b).count());
+            p1 = Some(paper.dots.len());
         }
     }
 
