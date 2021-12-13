@@ -2,19 +2,21 @@ use std::fmt::Display;
 
 use ahash::AHashSet;
 
-const WIDTH: usize = 1311;
-const HEIGHT: usize = 895;
-
 struct Paper {
-    width: usize,
-    height: usize,
     dots: AHashSet<(usize, usize)>,
 }
 
 impl Display for Paper {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for y in 0..self.height {
-            for x in 0..self.width {
+        let mut xmax = 0;
+        let mut ymax = 0;
+        for &(x, y) in &self.dots {
+            xmax = xmax.max(x);
+            ymax = ymax.max(y);
+        }
+
+        for y in 0..=ymax {
+            for x in 0..=xmax {
                 write!(
                     f,
                     "{}",
@@ -37,12 +39,9 @@ impl Paper {
         for (x, y) in points.lines().map(|p| p.split_once(',').unwrap()) {
             let x = x.parse::<usize>().unwrap();
             let y = y.parse::<usize>().unwrap();
-            debug_assert!(x < WIDTH && y < HEIGHT, "{} {}", x, y);
             dots.insert((x, y));
         }
         Self {
-            width: WIDTH,
-            height: HEIGHT,
             dots,
         }
     }
@@ -56,8 +55,6 @@ impl Paper {
                 self.dots.insert((2 * n - x, y));
             }
         }
-
-        self.width = n;
     }
 
     fn fold_y(&mut self, n: usize) {
@@ -69,8 +66,6 @@ impl Paper {
                 self.dots.insert((x, 2 * n - y));
             }
         }
-
-        self.height = n;
     }
 }
 
