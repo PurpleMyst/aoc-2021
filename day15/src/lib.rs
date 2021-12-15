@@ -24,7 +24,7 @@ fn neighbors<const SIDE: usize>(x: usize, y: usize) -> impl Iterator<Item = (usi
     })
 }
 
-fn foo(mut risk: usize) -> usize {
+fn fix_cost(mut risk: u16) -> u16 {
     while risk > 9 {
         risk -= 9;
     }
@@ -33,16 +33,16 @@ fn foo(mut risk: usize) -> usize {
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
-    let map: Vec<_> = include_str!("input.txt")
+    let map: Vec<u16> = include_str!("input.txt")
         .bytes()
         .filter(|ch| ch.is_ascii_digit())
-        .map(|b| (b - b'0') as usize)
+        .map(|b| (b - b'0') as _)
         .collect();
 
     let (_, p1) = astar(
         &(0, 0),
         |&(x, y)| neighbors::<P1_SIDE>(x, y).map(|(x, y)| ((x, y), map[y * P1_SIDE + x])),
-        |&(x, y)| absdiff(x, P1_SIDE - 1) + absdiff(y, P1_SIDE - 1),
+        |&(x, y)| absdiff(x, P1_SIDE - 1) as u16 + absdiff(y, P1_SIDE - 1) as u16,
         |&p| p == (P1_SIDE - 1, P1_SIDE - 1),
     )
     .unwrap();
@@ -53,11 +53,11 @@ pub fn solve() -> (impl Display, impl Display) {
             neighbors::<P2_SIDE>(x, y).map(|(x, y)| {
                 (
                     (x, y),
-                    foo(map[(y % P1_SIDE) * P1_SIDE + (x % P1_SIDE)] + x / P1_SIDE + y / P1_SIDE),
+                    fix_cost(map[(y % P1_SIDE) * P1_SIDE + (x % P1_SIDE)] + (x / P1_SIDE) as u16 + (y / P1_SIDE) as u16),
                 )
             })
         },
-        |&(x, y)| absdiff(x, P1_SIDE - 1) + absdiff(y, P1_SIDE - 1),
+        |&(x, y)| (absdiff(x, P1_SIDE - 1) + absdiff(y, P1_SIDE - 1)) as u16,
         |&p| p == (P2_SIDE - 1, P2_SIDE - 1),
     )
     .unwrap();
