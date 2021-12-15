@@ -1,6 +1,18 @@
 use std::fmt::Display;
 
-use ndarray::Array;
+use ndarray::{Array, Array2};
+
+fn mat_pow(x: Array2<u64>, n: u64) -> Array2<u64> {
+    if n == 0 {
+        unreachable!();
+    } else if n == 1 {
+        x
+    } else if n & 1 == 0 {
+        mat_pow(x.dot(&x), n / 2)
+    } else {
+        x.dot(&mat_pow(x.dot(&x), (n-1) / 2))
+    }
+}
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
@@ -20,21 +32,20 @@ pub fn solve() -> (impl Display, impl Display) {
         counter += 1;
     });
 
-    let mut f = ndarray::Array::zeros((counter, counter));
+    let mut f = Array::zeros((counter, counter));
     for (i, [a, b], c) in fruit {
         f[(*cake.get_by_left(&[a, c]).unwrap(), i)] += 1;
         f[(*cake.get_by_left(&[c, b]).unwrap(), i)] += 1;
     }
 
-    let mut t = ndarray::Array::zeros(counter);
+    let mut t = Array::zeros(counter);
     for w in template.as_bytes().windows(2) {
         let w: [u8; 2] = w.try_into().unwrap();
         t[*cake.get_by_left(&w).unwrap()] += 1;
     }
 
-    let solver = |n| {
-        let result = (0..n - 1)
-            .fold(f.clone(), |acc: Array<u64, _>, _| acc.dot(&f))
+    let solver = |n: u64| {
+        let result = mat_pow(f.clone(), n)
             .dot(&t);
 
         let mut freq = [0; 26];
