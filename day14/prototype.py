@@ -1,8 +1,6 @@
 from pathlib import Path
-import typing as t
 
 import numpy as np
-import numpy.typing as npt
 
 
 def main() -> None:
@@ -12,7 +10,7 @@ def main() -> None:
     rules = dict(rule.split(" -> ") for rule in rules.splitlines())
 
     # Make an order for all possible pairs
-    order = sorted(rules.keys())
+    order = list(rules.keys())
 
     # Construct a matrix that maps each rule AB -> C to the pairs AC and CB that it produces.
     # Each column corresponds to one pair.
@@ -28,6 +26,10 @@ def main() -> None:
     template_matrix = np.zeros(len(order), dtype=np.int64)
     for pair in zip(template, template[1:]):
         template_matrix[order.index("".join(pair))] += 1
+
+    print(step_matrix)
+    print( np.linalg.matrix_power(step_matrix, 2))
+    print( np.linalg.matrix_power(step_matrix, 3))
 
     def solve(steps: int) -> int:
         # Exponentiate our matrix to the number of steps required.

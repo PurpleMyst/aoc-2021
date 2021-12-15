@@ -1,87 +1,52 @@
-use std::{collections::Vec, fmt::Display};
+use std::fmt::Display;
 
-struct Rules([Option<u8>; 26 * 26]);
-
-impl Rules {
-    fn new(rules: &str) -> Self {
-        let mut inserts = [None; 26 * 26];
-        rules
-            .lines()
-            .map(|line| line.split_once(" -> ").unwrap())
-            .for_each(|(lhs, rhs)| {
-                inserts[usize::from(lhs.as_bytes()[0] - b'A') * 26
-                    + usize::from(lhs.as_bytes()[1] - b'A')] = Some(rhs.as_bytes()[0] - b'A');
-            });
-        Self(inserts)
-    }
-
-    fn get(&self, (fst, snd): (u8, u8)) -> Option<u8> {
-        self.0[usize::from(fst) * 26 + usize::from(snd)]
-    }
-}
-
-fn step(rules: &Rules, polymer: &mut Vec<u8>) {
-    let mut i = 0;
-    while i < polymer.len() - 1 {
-        let fst = polymer[i];
-        let snd = polymer[i + 1];
-        if let Some(new) = rules.get((fst, snd)) {
-            polymer.insert(i + 1, new);
-            i += 1;
-        }
-        i += 1;
-    }
-}
-
-struct Computer {
-    lut: [[usize; 26]; 26 * 26],
-    rules: Rules,
-}
-
-fn tally(frequency: &mut [usize; 26], polymer: &[u8]) {
-    for &ch in polymer {
-        frequency[usize::from(ch)] += 1;
-    }
-}
-
-impl Computer {
-    fn new(rules: Rules) -> Self {
-        Self {
-            lut: [[0; 26]; 26 * 26],
-            rules,
-        }
-    }
-
-    fn run_toplevel(&mut self, template: &[u8], generations: usize) {
-        template
-            .windows(2)
-            .for_each(|pair| self.run_pair(pair.try_into().unwrap(), generations));
-    }
-
-    fn run_pair(&mut self, [fst, snd]: [u8; 2], generations: usize) {
-        let mut polymer = vec![fst, snd];
-
-        for _ in 0..generations {
-            step(&self.rules, &mut polymer);
-        }
-
-        tally(&mut self.lut[fst as usize * 26 + snd as usize], &polymer);
-    }
-
-}
+use ndarray::Array;
 
 #[inline]
 pub fn solve() -> (impl Display, impl Display) {
     let (template, rules) = include_str!("input.txt").trim().split_once("\n\n").unwrap();
 
-    let rules = Rules::new(rules);
+    let mut cake = bimap::BiMap::new();
+    let mut fruit = Vec::new();
+    let mut counter = 0;
 
-    let mut template = template.as_bytes().to_vec();
-    template.iter_mut().for_each(|ch| *ch -= b'A');
+    rules.lines().for_each(|line| {
+        let (lhs, rhs) = line.split_once(" -> ").unwrap();
 
-    let mut computer = Computer::new(rules);
+        let lhs: [u8; 2] = lhs.as_bytes().try_into().unwrap();
+        cake.insert(lhs, counter);
+        fruit.push((counter, lhs, rhs.as_bytes()[0]));
 
-    computer.run_toplevel(&template, 10);
+        counter += 1;
+    });
 
-    ("TODO", "TODO")
+    let mut f = ndarray::Array::zeros((counter, counter));
+    for (i, [a, b], c) in fruit {
+        f[(*cake.get_by_left(&[a, c]).unwrap(), i)] += 1;
+        f[(*cake.get_by_left(&[c, b]).unwrap(), i)] += 1;
+    }
+
+    let mut t = ndarray::Array::zeros(counter);
+    for w in template.as_bytes().windows(2) {
+        let w: [u8; 2] = w.try_into().unwrap();
+        t[*cake.get_by_left(&w).unwrap()] += 1;
+    }
+
+    let solver = |n| {
+        let result = (0..n - 1)
+            .fold(f.clone(), |acc: Array<u64, _>, _| acc.dot(&f))
+            .dot(&t);
+
+        let mut freq = [0; 26];
+        freq[usize::from(template.as_bytes().last().unwrap() - b'A')] += 1;
+
+        for (&k, &v) in cake.iter() {
+            freq[usize::from(k[0] - b'A')] += result[v] as u64;
+        }
+
+        freq.iter().copied().max().unwrap()
+            - freq.iter().copied().filter(|&n| n != 0).min().unwrap()
+    };
+
+    (solver(10), solver(40))
 }
