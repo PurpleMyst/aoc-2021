@@ -53,7 +53,11 @@ pub fn solve() -> (impl Display, impl Display) {
             neighbors::<P2_SIDE>(x, y).map(|(x, y)| {
                 (
                     (x, y),
-                    fix_cost(map[(y % P1_SIDE) * P1_SIDE + (x % P1_SIDE)] + (x / P1_SIDE) as u16 + (y / P1_SIDE) as u16),
+                    fix_cost(
+                        map[(y % P1_SIDE) * P1_SIDE + (x % P1_SIDE)]
+                            + (x / P1_SIDE) as u16
+                            + (y / P1_SIDE) as u16,
+                    ),
                 )
             })
         },

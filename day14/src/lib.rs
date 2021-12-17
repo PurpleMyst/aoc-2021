@@ -10,7 +10,7 @@ fn mat_pow(x: Array2<u64>, n: u64) -> Array2<u64> {
     } else if n & 1 == 0 {
         mat_pow(x.dot(&x), n / 2)
     } else {
-        x.dot(&mat_pow(x.dot(&x), (n-1) / 2))
+        x.dot(&mat_pow(x.dot(&x), (n - 1) / 2))
     }
 }
 
@@ -45,8 +45,7 @@ pub fn solve() -> (impl Display, impl Display) {
     }
 
     let solver = |n: u64| {
-        let result = mat_pow(f.clone(), n)
-            .dot(&t);
+        let result = mat_pow(f.clone(), n).dot(&t);
 
         let mut freq = [0; 26];
         freq[usize::from(template.as_bytes().last().unwrap() - b'A')] += 1;

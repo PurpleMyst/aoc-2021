@@ -140,15 +140,15 @@ fn evaluate(packet: &Packet) -> u64 {
             header: PacketHeader { type_id, .. },
             children,
         } => match type_id {
-            0  => children.iter().map(evaluate).sum(),
-            1  => children.iter().map(evaluate).product(),
-            2  => children.iter().map(evaluate).min().unwrap(),
-            3  => children.iter().map(evaluate).max().unwrap(),
-            5  => (evaluate(&children[0]) > evaluate(&children[1])) as u64,
-            6  => (evaluate(&children[0]) < evaluate(&children[1])) as u64,
-            7  => (evaluate(&children[0]) == evaluate(&children[1])) as u64,
-            _  => unreachable!(),
-        }
+            0 => children.iter().map(evaluate).sum(),
+            1 => children.iter().map(evaluate).product(),
+            2 => children.iter().map(evaluate).min().unwrap(),
+            3 => children.iter().map(evaluate).max().unwrap(),
+            5 => (evaluate(&children[0]) > evaluate(&children[1])) as u64,
+            6 => (evaluate(&children[0]) < evaluate(&children[1])) as u64,
+            7 => (evaluate(&children[0]) == evaluate(&children[1])) as u64,
+            _ => unreachable!(),
+        },
     }
 }
 
