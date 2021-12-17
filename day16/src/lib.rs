@@ -119,7 +119,7 @@ fn load_input(input: &str) -> Vec<u8> {
         .trim()
         .as_bytes()
         .chunks_exact(2)
-        .map(|c| u8::from_str_radix(std::str::from_utf8(&c).unwrap(), 16).unwrap())
+        .map(|c| u8::from_str_radix(std::str::from_utf8(c).unwrap(), 16).unwrap())
         .collect()
 }
 
@@ -135,7 +135,7 @@ fn sum_versions(packet: &Packet) -> usize {
 
 fn evaluate(packet: &Packet) -> u64 {
     match packet {
-        Packet::Literal(LiteralPacket { value, .. }) => u64::from(*value),
+        Packet::Literal(LiteralPacket { value, .. }) => (*value),
         Packet::Operator {
             header: PacketHeader { type_id, .. },
             children,
