@@ -18,7 +18,7 @@ fn mat_pow(x: Array2<u64>, n: u64) -> Array2<u64> {
 pub fn solve() -> (impl Display, impl Display) {
     let (template, rules) = include_str!("input.txt").trim().split_once("\n\n").unwrap();
 
-    let mut cake = bimap::BiMap::new();
+    let mut cake = ahash::AHashMap::new();
     let mut fruit = Vec::new();
     let mut counter = 0;
 
@@ -34,14 +34,14 @@ pub fn solve() -> (impl Display, impl Display) {
 
     let mut f = Array::zeros((counter, counter));
     for (i, [a, b], c) in fruit {
-        f[(*cake.get_by_left(&[a, c]).unwrap(), i)] += 1;
-        f[(*cake.get_by_left(&[c, b]).unwrap(), i)] += 1;
+        f[(cake[&[a, c]], i)] += 1;
+        f[(cake[&[c, b]], i)] += 1;
     }
 
     let mut t = Array::zeros(counter);
     for w in template.as_bytes().windows(2) {
         let w: [u8; 2] = w.try_into().unwrap();
-        t[*cake.get_by_left(&w).unwrap()] += 1;
+        t[cake[&w]] += 1;
     }
 
     let solver = |n: u64| {
