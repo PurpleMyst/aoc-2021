@@ -18,7 +18,7 @@ impl Display for Item {
 }
 
 impl Item {
-    fn try_into_number(&mut self) -> Option<&mut u64> {
+    fn as_number_mut(&mut self) -> Option<&mut u64> {
         if let Self::Number(v) = self {
             Some(v)
         } else {
@@ -80,25 +80,20 @@ fn explode(n: &mut Vec<Item>) -> bool {
                     continue;
                 }
 
-                let mut it = n.drain(idx..idx + 4);
-                assert_eq!(it.next(), Some(Item::LeftBracket));
-                let a = *it.next().unwrap().try_into_number().unwrap();
-                let b = *it.next().unwrap().try_into_number().unwrap();
-                assert_eq!(it.next(), Some(Item::RightBracket));
-                drop(it);
+                let a = *n[idx+1].as_number_mut().unwrap();
+                let b = *n[idx+2].as_number_mut().unwrap();
 
                 if let Some(left) = left {
-                    if let Some(left) = Item::try_into_number(&mut n[left]) {
+                    if let Some(left) = Item::as_number_mut(&mut n[left]) {
                         *left += a;
                     }
                 }
 
-                if let Some(right) = n.iter_mut().skip(idx).find_map(Item::try_into_number) {
+                if let Some(right) = n.iter_mut().skip(idx).find_map(Item::as_number_mut) {
                     *right += b;
                 }
 
-                n.insert(idx, Item::Number(0));
-
+                n.splice(idx..idx+4, [Item::Number(0)]);
                 return true;
             }
             Item::RightBracket => depth -= 1,
@@ -117,19 +112,15 @@ fn split(n: &mut Vec<Item>) -> bool {
                 if m < 10 {
                     continue;
                 }
-                n.remove(idx);
 
                 let a = m / 2;
                 let b = (m + 1) / 2;
-                [
+                n.splice(idx..=idx, [
                     Item::LeftBracket,
                     Item::Number(a),
                     Item::Number(b),
                     Item::RightBracket,
-                ]
-                .into_iter()
-                .rev()
-                .for_each(|x| n.insert(idx, x));
+                ]);
 
                 return true;
             }
