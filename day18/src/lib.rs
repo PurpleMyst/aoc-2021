@@ -79,7 +79,7 @@ fn explode(items: &mut Vec<Item>) -> bool {
                     }
                 }
 
-                if let Some(right) = items.iter_mut().skip(idx).find_map(Item::as_number_mut) {
+                if let Some(right) = items.iter_mut().skip(idx+4).find_map(Item::as_number_mut) {
                     *right += b;
                 }
 
