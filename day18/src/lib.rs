@@ -126,11 +126,11 @@ pub fn solve() -> (impl Display, impl Display) {
         .collect::<Vec<_>>();
 
     let p1 = {
-        let mut terms = terms.iter().cloned();
-        let head = terms.next().unwrap();
+        let mut terms = terms.iter();
+        let head = terms.next().unwrap().clone();
         let total = terms.fold(head, |mut acc, current| {
             acc.insert(0, Item::OpenPair);
-            acc.extend(current);
+            acc.extend_from_slice(&current);
             acc.push(Item::ClosePair);
             reduce(&mut acc);
             acc
@@ -147,8 +147,8 @@ pub fn solve() -> (impl Display, impl Display) {
             }
             current.clear();
             current.push(Item::OpenPair);
-            current.extend(a);
-            current.extend(b);
+            current.extend_from_slice(&a);
+            current.extend_from_slice(&b);
             current.push(Item::ClosePair);
             reduce(&mut current);
             p2 = p2.max(mag(&current));
