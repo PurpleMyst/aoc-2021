@@ -2,19 +2,9 @@ use std::fmt::Display;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Item {
-    LeftBracket,
-    RightBracket,
+    OpenPair,
+    ClosePair,
     Number(u64),
-}
-
-impl Display for Item {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Item::LeftBracket => write!(f, "[ "),
-            Item::RightBracket => write!(f, "] "),
-            Item::Number(n) => write!(f, "{} ", n),
-        }
-    }
 }
 
 impl Item {
@@ -30,12 +20,12 @@ impl Item {
 fn load_input(input: &[u8]) -> Vec<Item> {
     input
         .iter()
-        .filter_map(|b| {
-            Some(match b {
-                b'[' => Item::LeftBracket,
-                b']' => Item::RightBracket,
+        .filter_map(|ch| {
+            Some(match ch {
+                b'[' => Item::OpenPair,
+                b']' => Item::ClosePair,
                 b',' => return None,
-                _ => Item::Number((b - b'0').into()),
+                _ => Item::Number((ch - b'0').into()),
             })
         })
         .collect()
@@ -46,8 +36,8 @@ fn mag(n: &[Item]) -> u64 {
 
     for item in n {
         match item {
-            Item::LeftBracket => stack.push((None, None)),
-            Item::RightBracket => {
+            Item::OpenPair => stack.push((None, None)),
+            Item::ClosePair => {
                 let (a, b) = stack.pop().unwrap();
                 let m = 3 * a.unwrap() + 2 * b.unwrap();
                 match stack.last_mut() {
@@ -57,9 +47,9 @@ fn mag(n: &[Item]) -> u64 {
                     None => return m,
                 }
             }
-            Item::Number(m) => match stack.last_mut().unwrap() {
-                (a @ None, _) => *a = Some(*m),
-                (_, b @ None) => *b = Some(*m),
+            Item::Number(n) => match stack.last_mut().unwrap() {
+                (a @ None, _) => *a = Some(*n),
+                (_, b @ None) => *b = Some(*n),
                 (_, _) => unreachable!(),
             },
         }
@@ -68,35 +58,35 @@ fn mag(n: &[Item]) -> u64 {
     unreachable!();
 }
 
-fn explode(n: &mut Vec<Item>) -> bool {
+fn explode(items: &mut Vec<Item>) -> bool {
     let mut left = None;
     let mut depth = 0;
 
-    for (idx, item) in n.iter().enumerate() {
+    for (idx, item) in items.iter().enumerate() {
         match item {
-            Item::LeftBracket => {
+            Item::OpenPair => {
                 if depth != 4 {
                     depth += 1;
                     continue;
                 }
 
-                let a = *n[idx+1].as_number_mut().unwrap();
-                let b = *n[idx+2].as_number_mut().unwrap();
+                let a = *items[idx + 1].as_number_mut().unwrap();
+                let b = *items[idx + 2].as_number_mut().unwrap();
 
                 if let Some(left) = left {
-                    if let Some(left) = Item::as_number_mut(&mut n[left]) {
+                    if let Some(left) = Item::as_number_mut(&mut items[left]) {
                         *left += a;
                     }
                 }
 
-                if let Some(right) = n.iter_mut().skip(idx).find_map(Item::as_number_mut) {
+                if let Some(right) = items.iter_mut().skip(idx).find_map(Item::as_number_mut) {
                     *right += b;
                 }
 
-                n.splice(idx..idx+4, [Item::Number(0)]);
+                items.splice(idx..idx + 4, [Item::Number(0)]);
                 return true;
             }
-            Item::RightBracket => depth -= 1,
+            Item::ClosePair => depth -= 1,
             Item::Number(..) => left = Some(idx),
         }
     }
@@ -104,28 +94,31 @@ fn explode(n: &mut Vec<Item>) -> bool {
     false
 }
 
-fn split(n: &mut Vec<Item>) -> bool {
-    for (idx, item) in n.iter().enumerate() {
+fn split(items: &mut Vec<Item>) -> bool {
+    for (idx, item) in items.iter().enumerate() {
         match item {
-            Item::Number(m) => {
-                let m = *m;
-                if m < 10 {
+            Item::Number(n) => {
+                let n = *n;
+                if n < 10 {
                     continue;
                 }
 
-                let a = m / 2;
-                let b = (m + 1) / 2;
-                n.splice(idx..=idx, [
-                    Item::LeftBracket,
-                    Item::Number(a),
-                    Item::Number(b),
-                    Item::RightBracket,
-                ]);
+                let a = n / 2;
+                let b = (n + 1) / 2;
+                items.splice(
+                    idx..=idx,
+                    [
+                        Item::OpenPair,
+                        Item::Number(a),
+                        Item::Number(b),
+                        Item::ClosePair,
+                    ],
+                );
 
                 return true;
             }
 
-            Item::LeftBracket | Item::RightBracket => {}
+            Item::OpenPair | Item::ClosePair => {}
         }
     }
     false
@@ -146,30 +139,30 @@ pub fn solve() -> (impl Display, impl Display) {
     let p1 = {
         let mut terms = terms.iter().cloned();
         let head = terms.next().unwrap();
-        let foo = terms.fold(head, |a, b| {
-            let mut c = vec![Item::LeftBracket];
-            c.extend(a);
-            c.extend(b);
-            c.push(Item::RightBracket);
-            reduce(&mut c);
-            c
+        let total = terms.fold(head, |mut acc, current| {
+            acc.insert(0, Item::OpenPair);
+            acc.extend(current);
+            acc.push(Item::ClosePair);
+            reduce(&mut acc);
+            acc
         });
-        mag(&foo)
+        mag(&total)
     };
 
     let mut p2 = 0;
+    let mut current = Vec::new();
     for a in &terms {
         for b in &terms {
             if a == b {
                 continue;
             }
-            let mut c = vec![Item::LeftBracket];
-            c.extend(a);
-            c.extend(b);
-            c.push(Item::RightBracket);
-            reduce(&mut c);
-            let m = mag(&c);
-            p2 = p2.max(m);
+            current.clear();
+            current.push(Item::OpenPair);
+            current.extend(a);
+            current.extend(b);
+            current.push(Item::ClosePair);
+            reduce(&mut current);
+            p2 = p2.max(mag(&current));
         }
     }
 
