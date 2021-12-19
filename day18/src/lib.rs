@@ -4,11 +4,11 @@ use std::fmt::Display;
 enum Item {
     OpenPair,
     ClosePair,
-    Number(u64),
+    Number(u16),
 }
 
 impl Item {
-    fn as_number_mut(&mut self) -> Option<&mut u64> {
+    fn as_number_mut(&mut self) -> Option<&mut u16> {
         if let Self::Number(v) = self {
             Some(v)
         } else {
@@ -31,31 +31,20 @@ fn load_input(input: &[u8]) -> Vec<Item> {
         .collect()
 }
 
-fn mag(n: &[Item]) -> u64 {
-    let mut stack: Vec<(Option<u64>, Option<u64>)> = Vec::new();
-
+fn mag(n: &[Item]) -> u16 {
+    let mut total = 0;
+    let mut k = 1;
     for item in n {
         match item {
-            Item::OpenPair => stack.push((None, None)),
-            Item::ClosePair => {
-                let (a, b) = stack.pop().unwrap();
-                let m = 3 * a.unwrap() + 2 * b.unwrap();
-                match stack.last_mut() {
-                    Some((a @ None, _)) => *a = Some(m),
-                    Some((_, b @ None)) => *b = Some(m),
-                    Some((_, _)) => unreachable!(),
-                    None => return m,
-                }
+            Item::OpenPair => k *= 3,
+            Item::ClosePair => k /= 2,
+            Item::Number(n) => {
+                total += k * n;
+                k = (k / 3) * 2;
             }
-            Item::Number(n) => match stack.last_mut().unwrap() {
-                (a @ None, _) => *a = Some(*n),
-                (_, b @ None) => *b = Some(*n),
-                (_, _) => unreachable!(),
-            },
         }
     }
-
-    unreachable!();
+    total
 }
 
 fn explode(items: &mut Vec<Item>) -> bool {
@@ -79,7 +68,7 @@ fn explode(items: &mut Vec<Item>) -> bool {
                     }
                 }
 
-                if let Some(right) = items.iter_mut().skip(idx+4).find_map(Item::as_number_mut) {
+                if let Some(right) = items.iter_mut().skip(idx + 4).find_map(Item::as_number_mut) {
                     *right += b;
                 }
 
