@@ -1,0 +1,10 @@
+[package]
+name = "day20"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+
+[dependencies]
+ahash = "0.7.6"
+bitvec = "1.0.0"
