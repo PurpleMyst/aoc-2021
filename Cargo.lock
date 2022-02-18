@@ -38,6 +38,7 @@ dependencies = [
  "day18",
  "day19",
  "day20",
+ "day21",
  "iai",
 ]
 
@@ -381,6 +382,13 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "bitvec 1.0.0",
+]
+
+[[package]]
+name = "day21"
+version = "0.1.0"
+dependencies = [
+ "ahash",
 ]
 
 [[package]]
