@@ -23,6 +23,7 @@ day15 = { path = "../day15" }
 day16 = { path = "../day16" }
 day17 = { path = "../day17" }
 day18 = { path = "../day18" }
+day19 = { path = "../day19" }
 
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }

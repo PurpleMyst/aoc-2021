@@ -1,4 +1,6 @@
 set shell := ["pwsh.exe", "-c"]
+export RUSTFLAGS := "-C target-cpu=native"
+export RUST_BACKTRACE := "1"
 
 default_baseline := "previous"
 
@@ -22,3 +24,11 @@ iai:
 alias wr := watch-run
 watch-run:
     Set-Location "{{invocation_directory()}}" && cargo watch --clear --exec run
+
+alias r := run
+run:
+    Set-Location "{{invocation_directory()}}" && cargo run
+
+alias rr := run-release
+run-release:
+    Set-Location "{{invocation_directory()}}" && cargo run --release
