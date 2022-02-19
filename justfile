@@ -4,8 +4,9 @@ export RUST_BACKTRACE := "1"
 
 default_baseline := "previous"
 
-start-solve:
-    py ./start_solve.py
+alias ss := start-solve
+start-solve *args:
+    python3 ./start_solve.py {{args}}
 
 alias sb := set-baseline
 set-baseline day name=default_baseline:
@@ -32,3 +33,7 @@ run:
 alias rr := run-release
 run-release:
     Set-Location "{{invocation_directory()}}" && cargo run --release
+
+alias rp := run-prototype
+run-prototype:
+    Set-Location "{{invocation_directory()}}" && cargo watch --clear --shell "python3 prototype.py"
