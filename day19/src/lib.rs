@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::ops::ControlFlow;
 
-use indexmap::IndexSet;
 use ahash::RandomState;
+use indexmap::IndexSet;
 
 type Scalar = i16;
 type Point = nalgebra::Vector3<Scalar>;
@@ -37,31 +37,37 @@ struct Solver {
 }
 
 impl Solver {
-    fn new(known_beacons: Report) -> Self { 
-    let mut transformations = [Transformation::zeros(); 24];
-    let mut it = transformations.iter_mut();
+    fn new(known_beacons: Report) -> Self {
+        let mut transformations = [Transformation::zeros(); 24];
+        let mut it = transformations.iter_mut();
 
-    for i in 0..3 {
-        for i_sgn in [1, -1] {
-            for j in 0..3 {
-                for j_sgn in [1, -1] {
-                    if i == j {
-                        continue;
+        for i in 0..3 {
+            for i_sgn in [1, -1] {
+                for j in 0..3 {
+                    for j_sgn in [1, -1] {
+                        if i == j {
+                            continue;
+                        }
+                        let mut iv = Point::zeros();
+                        iv[i] = i_sgn;
+                        let mut jv = Point::zeros();
+                        jv[j] = j_sgn;
+                        let kv = iv.cross(&jv);
+                        *it.next().unwrap() = Transformation::from_columns(&[iv, jv, kv]);
                     }
-                    let mut iv = Point::zeros();
-                    iv[i] = i_sgn;
-                    let mut jv = Point::zeros();
-                    jv[j] = j_sgn;
-                    let kv = iv.cross(&jv);
-                    *it.next().unwrap() = Transformation::from_columns(&[iv, jv, kv]);
                 }
             }
         }
-    }
 
         let scanner_positions = vec![];
         let known_fingerprints = fingerprints(&known_beacons);
-        Self { transformations, known_beacons, known_fingerprints, scanner_positions } }
+        Self {
+            transformations,
+            known_beacons,
+            known_fingerprints,
+            scanner_positions,
+        }
+    }
 
     fn best_fit(&mut self, candidate: &Report) -> ControlFlow<()> {
         let candidate_fps = fingerprints(&candidate);

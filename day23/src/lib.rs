@@ -5,19 +5,13 @@ use arrayvec::ArrayVec;
 const ENTRANCES: [usize; 4] = [2, 4, 6, 8];
 const PARKING: [usize; 11 - 4] = [0, 1, 3, 5, 7, 9, 10];
 
-const PART2_SURPRISE: [[usize; 2]; 4] = [
-    [3, 3],
-    [2, 1],
-    [1, 0],
-    [0, 2],
-];
+const PART2_SURPRISE: [[usize; 2]; 4] = [[3, 3], [2, 1], [1, 0], [0, 2]];
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Default)]
 struct State<const N: usize> {
     hallway: [Option<usize>; 11],
     rooms: [ArrayVec<usize, N>; 4],
 }
-
 
 fn steps_it(a: usize, b: usize) -> RangeInclusive<usize> {
     if a < b {
@@ -135,18 +129,29 @@ pub fn solve() -> (impl Display, impl Display) {
             });
         });
     part1_state.rooms.iter_mut().for_each(|room| room.reverse());
-    part2_state.rooms.iter_mut().zip(PART2_SURPRISE).for_each(|(room, [surprise1, surprise2])| {
+    part2_state
+        .rooms
+        .iter_mut()
+        .zip(PART2_SURPRISE)
+        .for_each(|(room, [surprise1, surprise2])| {
             room.reverse();
             room.insert(1, surprise1);
-            room.insert(1, surprise2);});
+            room.insert(1, surprise2);
+        });
 
-    let (_, part1) =
-        pathfinding::prelude::dijkstra(&part1_state, |state| state.advance(), |state| state.homed() == 4 * 2)
-            .unwrap();
+    let (_, part1) = pathfinding::prelude::dijkstra(
+        &part1_state,
+        |state| state.advance(),
+        |state| state.homed() == 4 * 2,
+    )
+    .unwrap();
 
-    let (_, part2) =
-        pathfinding::prelude::dijkstra(&part2_state, |state| state.advance(), |state| state.homed() == 4 * 4)
-            .unwrap();
+    let (_, part2) = pathfinding::prelude::dijkstra(
+        &part2_state,
+        |state| state.advance(),
+        |state| state.homed() == 4 * 4,
+    )
+    .unwrap();
 
     (part1, part2)
 }
