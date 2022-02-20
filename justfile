@@ -1,5 +1,4 @@
 set shell := ["pwsh.exe", "-c"]
-export RUSTFLAGS := "-C target-cpu=native"
 export RUST_BACKTRACE := "1"
 
 default_baseline := "previous"
