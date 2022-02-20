@@ -21,7 +21,7 @@ impl Range {
                 Ordering::Greater => Some(Self(other.0, self.1.min(other.1))),
             },
             Ordering::Equal => Some(Self(self.0, self.1.min(other.1))),
-            Ordering::Greater => other.intersect(&self),
+            Ordering::Greater => other.intersect(self),
         }
     }
 
@@ -47,7 +47,7 @@ impl Cuboid {
             x: self.x.intersect(&other.x)?,
             y: self.y.intersect(&other.y)?,
             z: self.z.intersect(&other.z)?,
-            sgn: self.sgn * other.sgn * -1,
+            sgn: -(self.sgn * other.sgn),
         })
     }
 

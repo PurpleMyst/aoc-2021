@@ -130,7 +130,7 @@ pub fn solve() -> (impl Display, impl Display) {
         let head = terms.next().unwrap().clone();
         let total = terms.fold(head, |mut acc, current| {
             acc.insert(0, Item::OpenPair);
-            acc.extend_from_slice(&current);
+            acc.extend_from_slice(current);
             acc.push(Item::ClosePair);
             reduce(&mut acc);
             acc
@@ -147,8 +147,8 @@ pub fn solve() -> (impl Display, impl Display) {
             }
             current.clear();
             current.push(Item::OpenPair);
-            current.extend_from_slice(&a);
-            current.extend_from_slice(&b);
+            current.extend_from_slice(a);
+            current.extend_from_slice(b);
             current.push(Item::ClosePair);
             reduce(&mut current);
             p2 = p2.max(mag(&current));

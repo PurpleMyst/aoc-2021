@@ -29,8 +29,8 @@ pub fn solve() -> (impl Display, impl Display) {
         .zip(algorithm.iter_mut())
         .for_each(|(b, mut dest)| *dest = b == b'#');
 
-    debug_assert_eq!(algorithm[0], true);
-    debug_assert_eq!(algorithm[511], false);
+    debug_assert!(algorithm[0]);
+    debug_assert!(!algorithm[511]);
 
     let mut state: State = start_state
         .split('\n')

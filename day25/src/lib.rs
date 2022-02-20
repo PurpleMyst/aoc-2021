@@ -105,7 +105,7 @@ pub fn solve() -> (impl Display, impl Display) {
             // Get the east and south rows that we'll be falling onto.
             let mut next_e_row = e_herd_it
                 .next()
-                .unwrap_or(&&east_herd[0])
+                .unwrap_or(&east_herd[0])
                 .iter()
                 .copied()
                 .peekable();

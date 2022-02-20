@@ -70,7 +70,7 @@ impl Solver {
     }
 
     fn best_fit(&mut self, candidate: &Report) -> ControlFlow<()> {
-        let candidate_fps = fingerprints(&candidate);
+        let candidate_fps = fingerprints(candidate);
         let common_fps: Vec<_> = candidate_fps
             .keys()
             .filter(|k| self.known_fingerprints.contains_key(k))
@@ -125,7 +125,7 @@ pub fn solve() -> (impl Display, impl Display) {
 
     while !unknown_scanners.is_empty() {
         for (idx, scanner) in unknown_scanners.iter().enumerate() {
-            if matches!(solver.best_fit(&scanner), ControlFlow::Break(())) {
+            if matches!(solver.best_fit(scanner), ControlFlow::Break(())) {
                 unknown_scanners.swap_remove(idx);
                 break;
             }
