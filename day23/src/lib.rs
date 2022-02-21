@@ -45,7 +45,7 @@ impl<const N: usize> State<N> {
             let mut steps = (N - 1) - self.rooms[pod].len();
             for k in steps_it(x, ENTRANCES[pod]) {
                 if k == x || self.hallway[k].is_none() {
-                    steps += 2;
+                    steps += 1;
                 } else {
                     continue 'homeloop;
                 }
